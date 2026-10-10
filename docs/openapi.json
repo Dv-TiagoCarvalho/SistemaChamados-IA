@@ -1,0 +1,1044 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Central de Chamados com IA",
+    "description": "API de chamados de suporte de TI com classificação por IA generativa e integração com um sistema corporativo (ITSM).",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/saude": {
+      "get": {
+        "tags": [
+          "sistema"
+        ],
+        "summary": "Saude",
+        "description": "Usado por monitoramento para saber se a API está de pé.",
+        "operationId": "saude_api_saude_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Saude"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/indicadores": {
+      "get": {
+        "tags": [
+          "chamados"
+        ],
+        "summary": "Indicadores",
+        "operationId": "indicadores_api_indicadores_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Indicadores"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chamados": {
+      "post": {
+        "tags": [
+          "chamados"
+        ],
+        "summary": "Criar Chamado",
+        "description": "Abre um chamado: classifica com IA, calcula o prazo e registra no ITSM.",
+        "operationId": "criar_chamado_api_chamados_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChamadoCriar"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChamadoDetalhe"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "chamados"
+        ],
+        "summary": "Listar Chamados",
+        "description": "Lista os chamados: em andamento primeiro, do prazo mais próximo ao mais distante.",
+        "operationId": "listar_chamados_api_chamados_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Status"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "name": "prioridade",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Prioridade"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Prioridade"
+            }
+          },
+          {
+            "name": "categoria",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Categoria"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Categoria"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChamadoResumo"
+                  },
+                  "title": "Response Listar Chamados Api Chamados Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chamados/{chamado_id}": {
+      "get": {
+        "tags": [
+          "chamados"
+        ],
+        "summary": "Obter Chamado",
+        "operationId": "obter_chamado_api_chamados__chamado_id__get",
+        "parameters": [
+          {
+            "name": "chamado_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Chamado Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChamadoDetalhe"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Chamado não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chamados/{chamado_id}/status": {
+      "patch": {
+        "tags": [
+          "chamados"
+        ],
+        "summary": "Alterar Status",
+        "operationId": "alterar_status_api_chamados__chamado_id__status_patch",
+        "parameters": [
+          {
+            "name": "chamado_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Chamado Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusAlterar"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChamadoDetalhe"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Chamado não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Transição não permitida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chamados/{chamado_id}/classificacao": {
+      "patch": {
+        "tags": [
+          "chamados"
+        ],
+        "summary": "Corrigir Classificacao",
+        "description": "Correção humana da classificação feita pela IA. Recalcula o prazo.",
+        "operationId": "corrigir_classificacao_api_chamados__chamado_id__classificacao_patch",
+        "parameters": [
+          {
+            "name": "chamado_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Chamado Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClassificacaoCorrigir"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChamadoDetalhe"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Chamado não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chamados/{chamado_id}/sugestao-resposta": {
+      "post": {
+        "tags": [
+          "ia"
+        ],
+        "summary": "Sugerir Resposta",
+        "description": "Gera um rascunho de resposta. Nada é enviado: o atendente revisa antes.",
+        "operationId": "sugerir_resposta_api_chamados__chamado_id__sugestao_resposta_post",
+        "parameters": [
+          {
+            "name": "chamado_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Chamado Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SugestaoResposta"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Chamado não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chamados/{chamado_id}/sincronizar": {
+      "post": {
+        "tags": [
+          "integracao"
+        ],
+        "summary": "Sincronizar",
+        "description": "Tenta de novo a integração com o ITSM depois de uma falha.",
+        "operationId": "sincronizar_api_chamados__chamado_id__sincronizar_post",
+        "parameters": [
+          {
+            "name": "chamado_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Chamado Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChamadoDetalhe"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Chamado não encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/webhooks/itsm": {
+      "post": {
+        "tags": [
+          "integracao"
+        ],
+        "summary": "Receber Webhook Itsm",
+        "description": "Recebe a mudança de estado de um incidente.\n\nO cabeçalho `X-Assinatura` deve conter `sha256=<HMAC-SHA256 do corpo>`\ncalculado com o segredo compartilhado. Sem isso, qualquer pessoa que\ndescobrisse a URL poderia alterar chamados.",
+        "operationId": "receber_webhook_itsm_api_webhooks_itsm_post",
+        "parameters": [
+          {
+            "name": "x-assinatura",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Assinatura"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChamadoResumo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Assinatura ausente ou inválida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Nenhum chamado com esse id externo",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Corpo ou estado inválido",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Categoria": {
+        "type": "string",
+        "enum": [
+          "acesso",
+          "hardware",
+          "software",
+          "rede",
+          "outros"
+        ],
+        "title": "Categoria"
+      },
+      "ChamadoCriar": {
+        "properties": {
+          "titulo": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 3,
+            "title": "Titulo"
+          },
+          "descricao": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 10,
+            "title": "Descricao"
+          },
+          "solicitante_email": {
+            "type": "string",
+            "format": "email",
+            "title": "Solicitante Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "titulo",
+          "descricao",
+          "solicitante_email"
+        ],
+        "title": "ChamadoCriar"
+      },
+      "ChamadoDetalhe": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "titulo": {
+            "type": "string",
+            "title": "Titulo"
+          },
+          "solicitante_email": {
+            "type": "string",
+            "title": "Solicitante Email"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "categoria": {
+            "$ref": "#/components/schemas/Categoria"
+          },
+          "prioridade": {
+            "$ref": "#/components/schemas/Prioridade"
+          },
+          "resumo": {
+            "type": "string",
+            "title": "Resumo"
+          },
+          "origem_classificacao": {
+            "$ref": "#/components/schemas/OrigemClassificacao"
+          },
+          "prazo_sla": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Prazo Sla"
+          },
+          "sla_vencido": {
+            "type": "boolean",
+            "title": "Sla Vencido"
+          },
+          "id_externo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Externo"
+          },
+          "situacao_integracao": {
+            "$ref": "#/components/schemas/SituacaoIntegracao"
+          },
+          "criado_em": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Criado Em"
+          },
+          "atualizado_em": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Atualizado Em"
+          },
+          "descricao": {
+            "type": "string",
+            "title": "Descricao"
+          },
+          "justificativa": {
+            "type": "string",
+            "title": "Justificativa"
+          },
+          "erro_integracao": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erro Integracao"
+          },
+          "proximos_status": {
+            "items": {
+              "$ref": "#/components/schemas/Status"
+            },
+            "type": "array",
+            "title": "Proximos Status"
+          },
+          "eventos": {
+            "items": {
+              "$ref": "#/components/schemas/EventoSaida"
+            },
+            "type": "array",
+            "title": "Eventos"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "titulo",
+          "solicitante_email",
+          "status",
+          "categoria",
+          "prioridade",
+          "resumo",
+          "origem_classificacao",
+          "prazo_sla",
+          "sla_vencido",
+          "id_externo",
+          "situacao_integracao",
+          "criado_em",
+          "atualizado_em",
+          "descricao",
+          "justificativa",
+          "erro_integracao",
+          "proximos_status",
+          "eventos"
+        ],
+        "title": "ChamadoDetalhe",
+        "description": "Versão completa, usada na tela de detalhe."
+      },
+      "ChamadoResumo": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "titulo": {
+            "type": "string",
+            "title": "Titulo"
+          },
+          "solicitante_email": {
+            "type": "string",
+            "title": "Solicitante Email"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "categoria": {
+            "$ref": "#/components/schemas/Categoria"
+          },
+          "prioridade": {
+            "$ref": "#/components/schemas/Prioridade"
+          },
+          "resumo": {
+            "type": "string",
+            "title": "Resumo"
+          },
+          "origem_classificacao": {
+            "$ref": "#/components/schemas/OrigemClassificacao"
+          },
+          "prazo_sla": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Prazo Sla"
+          },
+          "sla_vencido": {
+            "type": "boolean",
+            "title": "Sla Vencido"
+          },
+          "id_externo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id Externo"
+          },
+          "situacao_integracao": {
+            "$ref": "#/components/schemas/SituacaoIntegracao"
+          },
+          "criado_em": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Criado Em"
+          },
+          "atualizado_em": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Atualizado Em"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "titulo",
+          "solicitante_email",
+          "status",
+          "categoria",
+          "prioridade",
+          "resumo",
+          "origem_classificacao",
+          "prazo_sla",
+          "sla_vencido",
+          "id_externo",
+          "situacao_integracao",
+          "criado_em",
+          "atualizado_em"
+        ],
+        "title": "ChamadoResumo",
+        "description": "Versão enxuta, usada na listagem."
+      },
+      "ClassificacaoCorrigir": {
+        "properties": {
+          "categoria": {
+            "$ref": "#/components/schemas/Categoria"
+          },
+          "prioridade": {
+            "$ref": "#/components/schemas/Prioridade"
+          }
+        },
+        "type": "object",
+        "required": [
+          "categoria",
+          "prioridade"
+        ],
+        "title": "ClassificacaoCorrigir"
+      },
+      "Erro": {
+        "properties": {
+          "detail": {
+            "type": "string",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "Erro"
+      },
+      "EventoSaida": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "tipo": {
+            "type": "string",
+            "title": "Tipo"
+          },
+          "descricao": {
+            "type": "string",
+            "title": "Descricao"
+          },
+          "criado_em": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Criado Em"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "tipo",
+          "descricao",
+          "criado_em"
+        ],
+        "title": "EventoSaida"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Indicadores": {
+        "properties": {
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "por_status": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/Status"
+            },
+            "type": "object",
+            "title": "Por Status"
+          },
+          "por_prioridade": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/Prioridade"
+            },
+            "type": "object",
+            "title": "Por Prioridade"
+          },
+          "sla_vencido": {
+            "type": "integer",
+            "title": "Sla Vencido"
+          },
+          "falhas_integracao": {
+            "type": "integer",
+            "title": "Falhas Integracao"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "por_status",
+          "por_prioridade",
+          "sla_vencido",
+          "falhas_integracao"
+        ],
+        "title": "Indicadores"
+      },
+      "OrigemClassificacao": {
+        "type": "string",
+        "enum": [
+          "ia",
+          "regra",
+          "humano"
+        ],
+        "title": "OrigemClassificacao"
+      },
+      "Prioridade": {
+        "type": "string",
+        "enum": [
+          "baixa",
+          "media",
+          "alta",
+          "critica"
+        ],
+        "title": "Prioridade"
+      },
+      "Saude": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "provedor_ia": {
+            "type": "string",
+            "title": "Provedor Ia"
+          },
+          "modelo_ia": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modelo Ia"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "provedor_ia",
+          "modelo_ia"
+        ],
+        "title": "Saude"
+      },
+      "SituacaoIntegracao": {
+        "type": "string",
+        "enum": [
+          "pendente",
+          "sincronizado",
+          "falhou"
+        ],
+        "title": "SituacaoIntegracao"
+      },
+      "Status": {
+        "type": "string",
+        "enum": [
+          "aberto",
+          "em_atendimento",
+          "resolvido",
+          "fechado"
+        ],
+        "title": "Status"
+      },
+      "StatusAlterar": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "StatusAlterar"
+      },
+      "SugestaoResposta": {
+        "properties": {
+          "texto": {
+            "type": "string",
+            "title": "Texto"
+          },
+          "origem": {
+            "$ref": "#/components/schemas/OrigemClassificacao"
+          }
+        },
+        "type": "object",
+        "required": [
+          "texto",
+          "origem"
+        ],
+        "title": "SugestaoResposta"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

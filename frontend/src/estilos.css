@@ -1,0 +1,521 @@
+/* Cores e medidas ficam em variáveis: mudar aqui muda a tela inteira. */
+:root {
+  --tinta: #152a2e;
+  --tinta-suave: #4d6166;
+  --papel: #eef2ef;
+  --superficie: #ffffff;
+  --linha: #cfd8d3;
+  --petroleo: #0a6b6b;
+  --petroleo-escuro: #074f4f;
+
+  --critica: #b4261c;
+  --alta: #c25a14;
+  --media: #7a6a00;
+  --baixa: #51697a;
+
+  --raio: 6px;
+  --fonte: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--fonte);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-stretch: 85%;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 650;
+}
+
+h3 {
+  font-size: 1rem;
+  font-weight: 650;
+  margin-bottom: 0.5rem;
+}
+
+p {
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--petroleo);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------ página */
+
+.pagina {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+.topo {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.topo__ia {
+  color: var(--tinta-suave);
+  font-size: 0.875rem;
+}
+
+/* --------------------------------------------------------- indicadores */
+
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  margin: 1.25rem 0;
+  border-top: 2px solid var(--tinta);
+  border-bottom: 1px solid var(--linha);
+}
+
+.indicador {
+  padding: 0.75rem 1rem 0.75rem 0;
+}
+
+.indicador + .indicador {
+  padding-left: 1rem;
+  border-left: 1px solid var(--linha);
+}
+
+.indicador dd {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  font-stretch: 80%;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.indicador dt {
+  color: var(--tinta-suave);
+  font-size: 0.875rem;
+}
+
+.indicador--alerta dd {
+  color: var(--critica);
+}
+
+/* -------------------------------------------------------------- colunas */
+
+.colunas {
+  display: grid;
+  grid-template-columns: minmax(300px, 400px) 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.painel__vazio {
+  padding: 3rem 1rem;
+  border: 1px dashed var(--linha);
+  border-radius: var(--raio);
+  color: var(--tinta-suave);
+  text-align: center;
+}
+
+/* ----------------------------------------------------------------- fila */
+
+.fila__filtros {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.fila__filtros label {
+  flex: 1;
+}
+
+.fila__aviso {
+  padding: 1.5rem 0;
+  color: var(--tinta-suave);
+}
+
+.fila__lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.item {
+  display: grid;
+  gap: 0.375rem;
+  width: 100%;
+  padding: 0.75rem 0.875rem;
+  border: 1px solid var(--linha);
+  border-left: 5px solid var(--cor);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  text-align: left;
+  cursor: pointer;
+}
+
+.item:hover {
+  border-color: var(--tinta-suave);
+  border-left-color: var(--cor);
+}
+
+.item[aria-current="true"] {
+  border-color: var(--tinta);
+  border-left-color: var(--cor);
+  box-shadow: 0 0 0 1px var(--tinta);
+}
+
+.item__topo {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.item__numero {
+  color: var(--tinta-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+.item__titulo {
+  flex: 1;
+  font-weight: 600;
+}
+
+.item__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.875rem;
+  color: var(--tinta-suave);
+  font-size: 0.875rem;
+}
+
+.item__falha {
+  color: var(--critica);
+  font-weight: 600;
+}
+
+.selo {
+  --cor: var(--tinta-suave);
+  display: inline-block;
+  padding: 0.0625rem 0.5rem;
+  border: 1px solid var(--cor);
+  border-radius: 999px;
+  color: var(--cor);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.selo--status {
+  --cor: var(--petroleo);
+  margin-left: 0.625rem;
+}
+
+/* --cor guarda a cor da prioridade; a faixa lateral e o selo usam a mesma.
+   Estas regras vêm depois de .selo para valerem sobre a cor padrão dele. */
+.item--critica,
+.selo--critica,
+.ficha--critica {
+  --cor: var(--critica);
+}
+.item--alta,
+.selo--alta,
+.ficha--alta {
+  --cor: var(--alta);
+}
+.item--media,
+.selo--media,
+.ficha--media {
+  --cor: var(--media);
+}
+.item--baixa,
+.selo--baixa,
+.ficha--baixa {
+  --cor: var(--baixa);
+}
+
+
+/* ---------------------------------------------------------------- prazo */
+
+.prazo {
+  --cor-prazo: var(--petroleo);
+  display: grid;
+  gap: 0.25rem;
+}
+
+.prazo--apertado {
+  --cor-prazo: var(--alta);
+}
+
+.prazo--vencido {
+  --cor-prazo: var(--critica);
+}
+
+.prazo__trilho {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--papel);
+  overflow: hidden;
+}
+
+.prazo__barra {
+  height: 100%;
+  background: var(--cor-prazo);
+  transition: width 0.4s ease;
+}
+
+.prazo__texto {
+  color: var(--cor-prazo);
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.prazo--parado {
+  color: var(--tinta-suave);
+  font-size: 0.875rem;
+}
+
+/* ---------------------------------------------------------------- ficha */
+
+.ficha {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  border: 1px solid var(--linha);
+  border-top: 5px solid var(--cor, var(--tinta));
+  border-radius: var(--raio);
+  background: var(--superficie);
+}
+
+.ficha section {
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--linha);
+}
+
+.ficha section > * + * {
+  margin-top: 0.625rem;
+}
+
+.ficha__voltar {
+  display: none;
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--petroleo);
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ficha__numero {
+  color: var(--tinta-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+.ficha__cabecalho h2 {
+  margin: 0.25rem 0;
+}
+
+.ficha__meta {
+  color: var(--tinta-suave);
+  font-size: 0.875rem;
+}
+
+.ficha__descricao {
+  max-width: 68ch;
+  white-space: pre-wrap;
+}
+
+.ficha .prazo__trilho {
+  height: 10px;
+  border-radius: 5px;
+}
+
+.classificacao {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.historico {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.historico li {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  gap: 0.75rem;
+  font-size: 0.9375rem;
+}
+
+.historico time {
+  color: var(--tinta-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------- formulários, botões */
+
+label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--tinta-suave);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  font-weight: 400;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.formulario__ajuda {
+  max-width: 60ch;
+  color: var(--tinta-suave);
+}
+
+.correcao {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.correcao .acoes {
+  grid-column: 1 / -1;
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem;
+}
+
+.botao {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--tinta);
+  border-radius: var(--raio);
+  background: var(--superficie);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.botao:hover {
+  background: var(--papel);
+}
+
+.botao--principal {
+  border-color: var(--petroleo);
+  background: var(--petroleo);
+  color: #fff;
+}
+
+.botao--principal:hover {
+  border-color: var(--petroleo-escuro);
+  background: var(--petroleo-escuro);
+}
+
+.botao:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.erro {
+  color: var(--critica);
+  font-weight: 600;
+}
+
+.erro--pagina {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--critica);
+  border-radius: var(--raio);
+  background: var(--superficie);
+}
+
+/* ------------------------------------------------------- telas estreitas */
+
+@media (max-width: 820px) {
+  .indicadores {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .indicador:nth-child(3) {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .indicador:nth-child(n + 3) {
+    border-top: 1px solid var(--linha);
+  }
+
+  .colunas {
+    grid-template-columns: 1fr;
+  }
+
+  /* No celular cabe uma coisa por vez: com painel aberto, a fila some. */
+  .colunas--com-painel .fila {
+    display: none;
+  }
+
+  .colunas:not(.colunas--com-painel) .painel {
+    display: none;
+  }
+
+  .ficha {
+    padding: 1rem;
+  }
+
+  .ficha__voltar {
+    display: block;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prazo__barra {
+    transition: none;
+  }
+}
